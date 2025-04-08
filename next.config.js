@@ -8,12 +8,6 @@ const nextConfig = {
       { message: /mongodb/ }
     ];
     return config;
-  },
-  // Reduce log output for warnings during build
-  logging: {
-    fetches: {
-      fullUrl: false
-    }
   }
 };
 
