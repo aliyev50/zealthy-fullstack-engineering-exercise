@@ -157,6 +157,108 @@ export default function AdminPage() {
     setShowModal(true)
   }
 
+  const addPredefinedComponent = (componentType: string, targetPage: number = 2) => {
+    const validPage = [2, 3].includes(targetPage) ? targetPage : 2
+    const order = components.filter(c => c.page === validPage).length + 1
+    
+    let component: Partial<FormComponent> = {
+      required: true,
+      page: validPage,
+      order
+    };
+    
+    switch (componentType) {
+      case 'about':
+        component = {
+          ...component,
+          type: 'textarea',
+          label: 'About Me',
+          placeholder: 'Tell us a bit about yourself...',
+          validation: {
+            min: 10,
+            max: 500
+          }
+        };
+        break;
+      case 'address':
+        // We'll add this as 4 separate components
+        const addressComponents = [
+          {
+            type: 'text',
+            label: 'Street Address',
+            placeholder: 'Enter your street address',
+            required: true,
+            page: validPage,
+            order: order
+          },
+          {
+            type: 'text',
+            label: 'City',
+            placeholder: 'Enter your city',
+            required: true,
+            page: validPage,
+            order: order + 1
+          },
+          {
+            type: 'text',
+            label: 'State',
+            placeholder: 'Enter your state',
+            required: true,
+            page: validPage,
+            order: order + 2
+          },
+          {
+            type: 'text',
+            label: 'Zip Code',
+            placeholder: 'Enter your zip code',
+            required: true,
+            page: validPage,
+            order: order + 3,
+            validation: {
+              pattern: '^\\d{5}(-\\d{4})?$',
+              message: 'Please enter a valid zip code (e.g., 12345 or 12345-6789)'
+            }
+          }
+        ];
+        
+        // Add all address components in sequence
+        (async () => {
+          try {
+            for (const addrComponent of addressComponents) {
+              const response = await fetch('/api/form-components', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(addrComponent),
+              });
+              
+              if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to save component');
+              }
+            }
+            
+            await fetchComponents();
+          } catch (error) {
+            console.error('Failed to save address components:', error);
+            setError(error instanceof Error ? error.message : 'Failed to save address components');
+          }
+        })();
+        return; // Don't proceed to setEditingComponent
+        
+      case 'birthdate':
+        component = {
+          ...component,
+          type: 'date',
+          label: 'Birthdate',
+          placeholder: 'Select your date of birth'
+        };
+        break;
+    }
+    
+    setEditingComponent(component as FormComponent);
+    setShowModal(true);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -180,12 +282,52 @@ export default function AdminPage() {
             <p className="text-gray-600 mt-2">Manage components for your onboarding forms</p>
           </div>
           <div className="flex space-x-4">
-            <button
-              onClick={() => createNewComponent(2)}
-              className="px-4 py-2 bg-[#006A71] text-white rounded-lg hover:bg-[#005a60] transition-colors"
-            >
-              Add New Component
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => createNewComponent(2)}
+                className="px-4 py-2 bg-[#006A71] text-white rounded-lg hover:bg-[#005a60] transition-colors"
+              >
+                Add New Component
+              </button>
+            </div>
+            <div className="relative dropdown">
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors dropdown-toggle"
+                onClick={() => {
+                  const dropdown = document.getElementById('predefinedDropdown');
+                  if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                  }
+                }}
+              >
+                Add Predefined Component
+              </button>
+              <div id="predefinedDropdown" className="absolute hidden right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                <div className="py-1" role="menu" aria-orientation="vertical">
+                  <button
+                    onClick={() => addPredefinedComponent('about', currentPage)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    About Me (Text Area)
+                  </button>
+                  <button
+                    onClick={() => addPredefinedComponent('address', currentPage)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Address Fields
+                  </button>
+                  <button
+                    onClick={() => addPredefinedComponent('birthdate', currentPage)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Birthdate
+                  </button>
+                </div>
+              </div>
+            </div>
             <Link
               href="/"
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"

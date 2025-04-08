@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useTheme } from '@/context/ThemeContext'
+import { useState, useEffect } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface UserProfilePanelProps {
   userData: {
-    name?: string
-    email?: string
-    role?: string
-    about?: string
+    name?: string;
+    email?: string;
+    role?: string;
+    about?: string;
     address?: string | {
-      street?: string
-      city?: string
-      state?: string
-      zip?: string
-    }
-    phone?: string
-    profileImage?: string
-    [key: string]: any
-  }
-  onUpdateProfile: (data: Partial<UserProfilePanelProps['userData']>) => Promise<any>
+      street?: string;
+      city?: string;
+      state?: string;
+      zip?: string;
+    };
+    phone?: string;
+    profileImage?: string;
+    [key: string]: any;
+  };
+  onUpdateProfile: (data: Partial<UserProfilePanelProps['userData']>) => Promise<any>;
 }
 
 export default function UserProfilePanel({ userData = {}, onUpdateProfile }: UserProfilePanelProps) {
-  const { darkMode } = useTheme()
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const { darkMode } = useTheme();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedData, setEditedData] = useState({
     name: userData.name || '',
     email: userData.email || '',
@@ -37,7 +37,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
         ? `${userData.address.street || ''}, ${userData.address.city || ''}, ${userData.address.state || ''} ${userData.address.zip || ''}` 
         : '',
     phone: userData.phone || '',
-  })
+  });
 
   useEffect(() => {
     setEditedData({
@@ -51,37 +51,37 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
           ? `${userData.address.street || ''}, ${userData.address.city || ''}, ${userData.address.state || ''} ${userData.address.zip || ''}` 
           : '',
       phone: userData.phone || '',
-    })
-  }, [userData])
+    });
+  }, [userData]);
 
   const handleEdit = () => {
-    setIsEditing(true)
-    setEditedData(userData)
-  }
+    setIsEditing(true);
+    setEditedData(userData);
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
-    setEditedData(userData)
-  }
+    setIsEditing(false);
+    setEditedData(userData);
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      await onUpdateProfile(editedData)
-      setIsEditing(false)
+      await onUpdateProfile(editedData);
+      setIsEditing(false);
     } catch (error) {
-      console.error('Failed to update profile:', error)
+      console.error('Failed to update profile:', error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleChange = (field: keyof typeof userData, value: string) => {
     setEditedData(prev => ({
       ...prev,
       [field]: value
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -214,5 +214,5 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
         </div>
       </div>
     </div>
-  )
+  );
 } 

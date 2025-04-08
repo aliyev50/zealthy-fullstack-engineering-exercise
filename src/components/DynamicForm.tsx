@@ -165,6 +165,23 @@ export default function DynamicForm({
           </div>
         );
 
+      case 'date':
+        return (
+          <div key={label} className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="date"
+              value={value}
+              onChange={handleChange}
+              name={label}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#006A71]"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+        );
+
       default:
         return null;
     }

@@ -12,7 +12,12 @@ interface SettingsState {
   timezone: string
 }
 
-export default function SettingsPanel() {
+interface SettingsPanelProps {
+  userData: Record<string, any>
+  onUpdateSettings: (data: Record<string, any>) => Promise<any>
+}
+
+export default function SettingsPanel({ userData, onUpdateSettings }: SettingsPanelProps) {
   const { darkMode, toggleDarkMode } = useTheme()
   const [settings, setSettings] = useState<SettingsState>({
     emailNotifications: true,
@@ -37,8 +42,15 @@ export default function SettingsPanel() {
 
   const handleSave = async () => {
     setIsSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsSaving(false)
+    try {
+      await onUpdateSettings({
+        settings: settings
+      })
+    } catch (error) {
+      console.error('Failed to update settings:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (

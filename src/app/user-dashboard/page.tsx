@@ -52,13 +52,54 @@ export default function UserDashboardPage() {
       // Ensure formData exists
       const formData = data.formData || {}
       
+      // Format address fields into a properly formatted American address if individual components exist
+      let formattedAddress = formData.address || formData.Address || '';
+      
+      // Check if we have individual address components
+      const hasStreetAddress = formData['Street Address'] || formData.street;
+      const hasApt = formData['Apartment'] || formData.apt || formData.unit || formData.suite;
+      const hasCity = formData['City'] || formData.city;
+      const hasState = formData['State'] || formData.state;
+      const hasZipCode = formData['Zip Code'] || formData.zipCode || formData.zip;
+      
+      // If individual components exist, format them properly
+      if (hasStreetAddress || hasCity || hasState || hasZipCode) {
+        // Standard American address format: 
+        // Street Address (+ Apartment/Suite), City, State ZIP
+        let streetPart = hasStreetAddress || '';
+        if (hasApt) {
+          streetPart += `, ${hasApt}`;
+        }
+        
+        let cityStatePart = '';
+        if (hasCity) cityStatePart += hasCity;
+        if (hasState) {
+          // Format as "City, State"
+          cityStatePart += cityStatePart ? `, ${hasState}` : hasState;
+        }
+        
+        // For ZIP code, we don't use a comma before it in American format
+        if (hasZipCode) {
+          cityStatePart += ` ${hasZipCode}`;
+        }
+        
+        // Put it all together
+        let addressParts = [];
+        if (streetPart) addressParts.push(streetPart);
+        if (cityStatePart) addressParts.push(cityStatePart);
+        
+        formattedAddress = addressParts.join(', ');
+      }
+      
       setUserData({
         email: data.email,
         name: formData.name || formData.Name || formData.fullName || formData['Full Name'] || '',
         about: formData.about || formData.About || formData.bio || formData.Bio || '',
-        address: formData.address || formData.Address || '',
+        address: formattedAddress,
         phone: formData.phone || formData.Phone || formData['Phone Number'] || '',
         profileImage: formData.profileImage || formData.avatar || '',
+        birthdate: formData.birthdate || formData.Birthdate || formData['Birthdate'] || '',
+        role: formData.role || formData.Role || 'User',
         ...formData
       })
     } catch (error) {
