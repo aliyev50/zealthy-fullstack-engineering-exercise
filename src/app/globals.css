@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --primary-color: 5, 128, 127;
+}
+
+@layer base {
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  h3 {
+    @apply text-xl font-medium tracking-tight;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors tracking-wide;
+  }
+  
+  .btn-primary {
+    @apply bg-[#05807f] text-white hover:bg-[#05807f]/90;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#05807f]/50;
+  }
+  
+  .form-group {
+    @apply space-y-2;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-gray-700 tracking-wide;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-100;
+  }
+
+  .card-header {
+    @apply p-6 border-b border-gray-100;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+} 
