@@ -134,10 +134,10 @@ export default function DashboardPage() {
     ]
 
     const days = []
-    for (let i = 0 i < startingDay i++) {
+    for (let i = 0 ; i < startingDay; i++) {
       days.push(null)
     }
-    for (let i = 1 i <= daysInMonth i++) {
+    for (let i = 1; i <= daysInMonth; i++) {
       days.push(i)
     }
 
