@@ -14,7 +14,19 @@ export default function OnboardingForm({
   userData,
   onSubmit,
 }: OnboardingFormProps) {
-  const [formData, setFormData] = useState<Partial<UserData>>(userData)
+  // Initialize with empty address fields to avoid undefined errors
+  const initialData = {
+    ...userData,
+    address: {
+      street: userData.address?.street || '',
+      city: userData.address?.city || '',
+      state: userData.address?.state || '',
+      zip: userData.address?.zip || '',
+      ...userData.address
+    }
+  };
+  
+  const [formData, setFormData] = useState<Partial<UserData>>(initialData)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,13 +47,18 @@ export default function OnboardingForm({
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      address: {
-        ...prev.address,
-        [name]: value,
-      },
-    }))
+    setFormData((prev) => {
+      // Ensure we have a valid address object to work with
+      const currentAddress = prev.address || { street: '', city: '', state: '', zip: '' };
+      
+      return {
+        ...prev,
+        address: {
+          ...currentAddress,
+          [name]: value,
+        },
+      };
+    })
   }
 
   return (

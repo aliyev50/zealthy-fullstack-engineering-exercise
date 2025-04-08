@@ -105,6 +105,22 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
     }));
   };
 
+  // Helper function to format address for display
+  const formatAddress = (address: UserProfilePanelProps['userData']['address']): string => {
+    if (!address) return '';
+    if (typeof address === 'string') return address;
+    
+    // Format object address as a string
+    const parts = [
+      address.street,
+      address.city,
+      address.state,
+      address.zip
+    ].filter(Boolean); // Remove empty parts
+    
+    return parts.join(', ');
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -231,7 +247,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
               className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#006A71] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           ) : (
-            <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{userData.address}</p>
+            <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{formatAddress(userData.address)}</p>
           )}
         </div>
       </div>

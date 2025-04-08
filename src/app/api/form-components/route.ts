@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
+import { connectToDatabase } from '@/lib/mongodb'
 import { FormComponent } from '@/types'
 import { ObjectId } from 'mongodb'
 
 export async function GET() {
   try {
-    const client = await clientPromise
-    const db = client.db()
+    const { db } = await connectToDatabase()
     const components = await db.collection('form_components').find().sort({ page: 1, order: 1 }).toArray()
     return NextResponse.json(components)
   } catch (error) {
@@ -16,8 +15,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const client = await clientPromise
-    const db = client.db()
+    const { db } = await connectToDatabase()
     const data: FormComponent = await request.json()
 
     if (!data.type || !data.label || data.page === undefined) {
@@ -39,8 +37,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const client = await clientPromise
-    const db = client.db()
+    const { db } = await connectToDatabase()
     const data = await request.json()
     const { _id, ...updateData } = data
 
@@ -65,8 +62,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const client = await clientPromise
-    const db = client.db()
+    const { db } = await connectToDatabase()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 

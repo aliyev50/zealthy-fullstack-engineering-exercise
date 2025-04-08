@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
+import { connectToDatabase } from '@/lib/mongodb'
 import Config from '@/models/Config'
 
 export async function GET() {
   try {
-    await connectDB()
+    await connectToDatabase()
     let config = await Config.findOne()
     
     if (!config) {
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    await connectDB()
+    await connectToDatabase()
     const data = await request.json()
     const config = await Config.findOneAndUpdate(
       {},

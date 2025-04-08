@@ -10,10 +10,10 @@ export interface UserData {
   password: string
   about?: string
   address?: {
-    street: string
-    city: string
-    state: string
-    zip: string
+    street?: string
+    city?: string
+    state?: string
+    zip?: string
   }
   birthdate?: string
   currentStep: number
