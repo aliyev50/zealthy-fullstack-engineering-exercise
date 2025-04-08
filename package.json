@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "vercel-build": "rm -rf node_modules/.cache && next build",
+    "prepare": "pnpm install --no-frozen-lockfile || npm install",
     "start": "next start",
     "lint": "next lint"
   },
+  "packageManager": "pnpm@8.x",
   "keywords": [],
   "author": "",
   "license": "ISC",
