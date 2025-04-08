@@ -222,14 +222,14 @@ export default function OnboardingPage() {
               onSaveProgress={handleSaveProgress}
               maxPage={maxPage}
             />
-            <div className="flex justify-between items-center mt-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-y-2 md:gap-y-0 mt-6">
               <Link
                 href="/"
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-center"
               >
                 Back to main menu
               </Link>
-              <div className="flex space-x-4">
+              <div className="flex flex-col md:flex-row md:space-x-4 gap-y-6 md:gap-y-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -241,36 +241,23 @@ export default function OnboardingPage() {
                     })
                   }}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   type="button"
                   onClick={() => {
+                    setError('') // Clear errors when navigating
                     if (currentPage === maxPage) {
-                      // For the final page, use the handleSubmit function
                       handleSubmit()
                     } else {
-                      // Validate required fields for non-final pages
-                      const currentPageComponents = components.filter(c => c.page === currentPage)
-                      const missingFields = currentPageComponents
-                        .filter(c => c.required && !formData[c.label])
-                        .map(c => c.label)
-                        
-                      if (missingFields.length > 0) {
-                        setError(`Please fill in the following required fields: ${missingFields.join(', ')}`)
-                        return
-                      }
-                      
-                      // Clear any previous errors
-                      setError('')
                       handleNext()
                     }
                   }}
-                  className="px-4 py-2 bg-[#006A71] text-white rounded-md hover:bg-[#005a60]"
+                  className="w-full md:w-auto px-4 py-2 bg-[#006A71] border border-[#006A71] rounded-md text-white hover:bg-[#005a61]"
                 >
-                  {currentPage === maxPage ? 'Complete onboarding' : 'Next'}
+                  {currentPage === maxPage ? 'Complete' : 'Next'}
                 </button>
               </div>
             </div>

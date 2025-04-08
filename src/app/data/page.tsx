@@ -136,7 +136,7 @@ export default function DataPage() {
                 {data.map((item, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.formData.Name}
+                      {item.formData?.Name || item.formData?.name || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {item.email}

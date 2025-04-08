@@ -78,7 +78,7 @@ export default function HomePage() {
         <div className="mb-12">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-md bg-[#006A71] flex items-center justify-center text-white font-bold mr-2">Z</div>
-            <span className="text-2xl font-bold text-gray-900">zhealthy</span>
+            <span className="text-2xl font-bold text-gray-900">zealthy</span>
           </div>
         </div>
 
@@ -205,24 +205,24 @@ export default function HomePage() {
             </button>
           </form>
           
-          <div className="mt-6 flex justify-between text-sm">
+          <div className="mt-6 flex flex-col md:flex-row justify-between text-sm">
             <Link
               href="/admin"
-              className="text-[#006A71] hover:text-[#005a60] transition-colors"
+              className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
             >
               Admin Dashboard →
             </Link>
             
-            <div className="flex space-x-4">
+            <div className="flex flex-col md:flex-row md:space-x-4">
               <Link
                 href="/user-dashboard?email=demo@example.com"
-                className="text-[#006A71] hover:text-[#005a60] transition-colors"
+                className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
               >
                 User Dashboard →
               </Link>
               <Link
                 href="/data"
-                className="text-[#006A71] hover:text-[#005a60] transition-colors"
+                className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
               >
                 View Data →
               </Link>

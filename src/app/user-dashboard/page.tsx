@@ -17,6 +17,7 @@ export default function UserDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState('profile')
   const [error, setError] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     console.log('User dashboard loaded with email param:', email)
@@ -184,20 +185,153 @@ export default function UserDashboardPage() {
 
   return (
     <ThemeProvider>
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Sidebar */}
-        <UserSidebar 
-          email={userData.email}
-          name={userData.name}
-          profileImage={userData.profileImage}
-          onUpdateProfile={handleUpdateProfile}
-          onLogout={handleLogout}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Mobile Hamburger Menu */}
+        <div className="md:hidden bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-4 flex justify-between items-center sticky top-0 z-10">
+          <div className="flex items-center">
+            <img
+              src={userData.profileImage || '/default-avatar.png'}
+              alt={userData.name || 'User'}
+              className="w-10 h-10 rounded-full object-cover mr-3"
+              onError={(e) => {
+                e.currentTarget.src = '/default-avatar.png'
+              }}
+            />
+            <span className="font-medium text-gray-900 dark:text-white">{userData.name}</span>
+          </div>
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-gray-700 dark:text-gray-300"
+          >
+            {isMobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="absolute right-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg" onClick={(e) => e.stopPropagation()}>
+              <div className="p-4 border-b dark:border-gray-700">
+                <div className="flex justify-end">
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="flex flex-col items-center mt-4">
+                  <div className="relative w-24 h-24 mb-4">
+                    <img
+                      src={userData.profileImage || '/default-avatar.png'}
+                      alt={userData.name || 'User'}
+                      className="w-full h-full rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/default-avatar.png'
+                      }}
+                    />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            const formData = new FormData();
+                            formData.append('avatar', file);
+                            
+                            const response = await fetch('/api/upload', {
+                              method: 'POST',
+                              body: formData
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to upload image');
+                            }
+                            
+                            const { url } = await response.json();
+                            await handleUpdateProfile({ profileImage: url });
+                          } catch (error) {
+                            console.error('Failed to upload image:', error);
+                            setError('Failed to upload image. Please try again.');
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </label>
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{userData.name}</h2>
+                </div>
+              </div>
+              <nav className="p-4">
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setActiveSection('profile');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      activeSection === 'profile'
+                        ? 'bg-[#006A71] text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveSection('settings');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      activeSection === 'settings'
+                        ? 'bg-[#006A71] text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Settings
+                  </button>
+                </div>
+              </nav>
+              <div className="p-4 border-t dark:border-gray-700 mt-auto">
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Sidebar - Hidden on Mobile */}
+        <div className="hidden md:block">
+          <UserSidebar 
+            email={userData.email}
+            name={userData.name}
+            profileImage={userData.profileImage}
+            onUpdateProfile={handleUpdateProfile}
+            onLogout={handleLogout}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+          />
+        </div>
         
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 md:p-8">
           {error && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
               <p className="text-red-800 dark:text-red-400">{error}</p>
