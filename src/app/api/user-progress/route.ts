@@ -31,15 +31,18 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
-    console.log('GET - Searching for email:', email)
+    const fetchAll = searchParams.get('fetchAll') === 'true'
+    
+    console.log('GET - Searching for email:', email, 'fetchAll:', fetchAll)
 
-    if (!email) {
-      await connectDB()
+    await connectDB()
+    
+    // Return all progress records if fetchAll parameter is true OR no email is provided (for admin views)
+    if (fetchAll || !email) {
       const allProgress = await UserProgress.find().sort({ updatedAt: -1 })
       return NextResponse.json(allProgress)
     }
 
-    await connectDB()
     const progress = await UserProgress.findOne({ email })
 
     if (!progress) {
@@ -101,17 +104,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('POST error:', error)
     return NextResponse.json({ error: 'Failed to save user progress' }, { status: 500 })
-  }
-}
-
-// Get all users progress for admin view
-export async function GET_ALL() {
-  try {
-    await connectDB()
-    const allProgress = await UserProgress.find().sort({ updatedAt: -1 })
-    return NextResponse.json(allProgress)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch all user progress' }, { status: 500 })
   }
 }
 

@@ -12,7 +12,7 @@ export default function DataPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/user-progress')
+      const response = await fetch('/api/user-progress?fetchAll=true')
       if (!response.ok) {
         throw new Error('Failed to fetch data')
       }
