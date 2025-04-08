@@ -56,12 +56,34 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
 
   const handleEdit = () => {
     setIsEditing(true);
-    setEditedData(userData);
+    setEditedData({
+      name: userData.name || '',
+      email: userData.email || '',
+      role: userData.role || 'User', 
+      about: userData.about || '',
+      address: typeof userData.address === 'string'
+        ? userData.address
+        : userData.address
+          ? `${userData.address.street || ''}, ${userData.address.city || ''}, ${userData.address.state || ''} ${userData.address.zip || ''}`
+          : '',
+      phone: userData.phone || '',
+    });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditedData(userData);
+    setEditedData({
+      name: userData.name || '',
+      email: userData.email || '', 
+      role: userData.role || 'User',
+      about: userData.about || '',
+      address: typeof userData.address === 'string'
+        ? userData.address
+        : userData.address
+          ? `${userData.address.street || ''}, ${userData.address.city || ''}, ${userData.address.state || ''} ${userData.address.zip || ''}`
+          : '',
+      phone: userData.phone || '',
+    });
   };
 
   const handleSave = async () => {
