@@ -5,7 +5,6 @@ import mongoose from 'mongoose'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key')
 
-// Connect to MongoDB if not already connected
 const connectDB = async () => {
   if (mongoose.connections[0].readyState) return
   

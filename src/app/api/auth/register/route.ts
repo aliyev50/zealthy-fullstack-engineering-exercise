@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import User from '@/models/User'
 import mongoose from 'mongoose'
 
-// Connect to MongoDB if not already connected
 const connectDB = async () => {
   if (mongoose.connections[0].readyState) return
   

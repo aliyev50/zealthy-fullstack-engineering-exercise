@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
-// Connect to MongoDB
 const connectDB = async () => {
   try {
     if (mongoose.connections[0].readyState) return
@@ -12,7 +11,6 @@ const connectDB = async () => {
   }
 }
 
-// Define the schema for user progress
 const userProgressSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   currentPage: { type: Number, default: 1 },
@@ -24,7 +22,6 @@ const userProgressSchema = new mongoose.Schema({
   collection: 'userprogresses'
 })
 
-// Get or create the model
 const UserProgress = mongoose.models.UserProgress || mongoose.model('UserProgress', userProgressSchema)
 
 export async function GET(request: Request) {
@@ -37,7 +34,6 @@ export async function GET(request: Request) {
 
     await connectDB()
     
-    // Return all progress records if fetchAll parameter is true OR no email is provided (for admin views)
     if (fetchAll || !email) {
       const allProgress = await UserProgress.find().sort({ updatedAt: -1 })
       return NextResponse.json(allProgress)
@@ -67,7 +63,6 @@ export async function POST(request: Request) {
     const body = await request.json()
     console.log('POST - Saving progress for:', body)
     
-    // Check that we have an email - prioritize email field, but fallback to userId for compatibility
     const email = body.email || body.userId
     
     if (!email) {
@@ -115,7 +110,6 @@ export async function DELETE(request: Request) {
     
     await connectDB();
     
-    // Delete all data if the 'all' parameter is set to 'true'
     if (all === 'true') {
       console.log('DELETE - Removing all user progress data');
       const result = await UserProgress.deleteMany({});
@@ -125,7 +119,6 @@ export async function DELETE(request: Request) {
       });
     }
     
-    // Delete a specific user's data if email is provided
     if (email) {
       console.log(`DELETE - Removing user progress data for: ${email}`);
       const result = await UserProgress.deleteOne({ email });

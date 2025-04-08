@@ -17,7 +17,6 @@ export default function HomePage() {
   const [checkingProgress, setCheckingProgress] = useState(false)
 
   useEffect(() => {
-    // Set a random image number between 1-3
     setRandomImage(Math.floor(Math.random() * 3) + 1)
   }, [])
 
@@ -45,7 +44,6 @@ export default function HomePage() {
     }
 
     try {
-      // First try to log in with the credentials
       const loginResponse = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,27 +53,21 @@ export default function HomePage() {
       const loginData = await loginResponse.json()
       
       if (loginResponse.ok) {
-        // Login successful
         console.log('Login successful:', loginData)
         
-        // Check if user has completed onboarding
         const progressResponse = await fetch(`/api/user-progress?email=${encodeURIComponent(email)}`)
         if (progressResponse.ok) {
           const progress = await progressResponse.json()
           if (progress && progress.status === 'completed') {
-            // User completed onboarding, go to dashboard
             router.push(`/user-dashboard?email=${encodeURIComponent(email)}`)
           } else {
-            // User didn't complete onboarding
             router.push(`/onboarding?email=${encodeURIComponent(email)}`)
           }
         } else {
-          // No progress found, start onboarding
           router.push(`/onboarding?email=${encodeURIComponent(email)}`)
         }
         return
       } else if (loginResponse.status === 404) {
-        // User doesn't exist, try to register them
         const registerResponse = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -85,23 +77,19 @@ export default function HomePage() {
         const registerData = await registerResponse.json()
         
         if (registerResponse.ok) {
-          // Registration successful, start onboarding
           console.log('Registration successful:', registerData)
           router.push(`/onboarding?email=${encodeURIComponent(email)}`)
           return
         } else {
-          // Registration failed
           setError(registerData.error || 'Failed to register. Please try again.')
           setCheckingProgress(false)
           return
         }
       } else if (loginResponse.status === 401) {
-        // Invalid password
         setError('Invalid password. Please try again.')
         setCheckingProgress(false)
         return
       } else {
-        // Other login error
         setError(loginData.error || 'An error occurred. Please try again.')
         setCheckingProgress(false)
         return
@@ -115,7 +103,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Left Section: Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col p-10 lg:p-20">
         <div className="mb-12">
           <div className="flex items-center">
@@ -311,7 +298,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Right Section: Feature Showcase */}
       <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden">
         <Transition
           show={true}

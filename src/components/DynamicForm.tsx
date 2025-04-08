@@ -24,7 +24,7 @@ export default function DynamicForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-save progress when form data changes
+  
   useEffect(() => {
     const saveTimeout = setTimeout(() => {
       onSaveProgress(formData);
@@ -55,7 +55,6 @@ export default function DynamicForm({
         }
       }
     }
-
     return '';
   };
 
@@ -67,16 +66,13 @@ export default function DynamicForm({
     };
     setFormData(updatedData);
     
-    // Notify parent component about the change
     if (onSaveProgress) {
       onSaveProgress(updatedData);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     const currentPageComponents = components.filter(component => component.page === page);
     const hasRequiredFields = currentPageComponents.some(component => component.required);
     
@@ -91,10 +87,10 @@ export default function DynamicForm({
       }
     }
     
-    // Save progress before submitting
+    
     await onSaveProgress(formData);
     
-    // Submit the form
+    
     onSubmit(formData);
   };
 

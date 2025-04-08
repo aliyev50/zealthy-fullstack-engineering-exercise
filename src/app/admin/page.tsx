@@ -181,7 +181,6 @@ export default function AdminPage() {
         };
         break;
       case 'address':
-        // We'll add this as 4 separate components
         const addressComponents = [
           {
             type: 'text',
@@ -221,7 +220,6 @@ export default function AdminPage() {
           }
         ];
         
-        // Add all address components in sequence
         (async () => {
           try {
             for (const addrComponent of addressComponents) {
@@ -243,7 +241,7 @@ export default function AdminPage() {
             setError(error instanceof Error ? error.message : 'Failed to save address components');
           }
         })();
-        return; // Don't proceed to setEditingComponent
+        return;
         
       case 'birthdate':
         component = {

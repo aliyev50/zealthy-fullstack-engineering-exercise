@@ -43,7 +43,6 @@ export async function PUT(
     const collection = db.collection('form_components')
     const updates = await request.json()
 
-    // Log the ID and updates for debugging
     console.log('Updating component:', params.id, updates)
 
     const result = await collection.updateOne(

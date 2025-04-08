@@ -50,23 +50,22 @@ export default function UserDashboardPage() {
         return
       }
       
-      // Ensure formData exists
       const formData = data.formData || {}
       
-      // Format address fields into a properly formatted American address if individual components exist
+      
       let formattedAddress = formData.address || formData.Address || '';
       
-      // Check if we have individual address components
+      
       const hasStreetAddress = formData['Street Address'] || formData.street;
       const hasApt = formData['Apartment'] || formData.apt || formData.unit || formData.suite;
       const hasCity = formData['City'] || formData.city;
       const hasState = formData['State'] || formData.state;
       const hasZipCode = formData['Zip Code'] || formData.zipCode || formData.zip;
       
-      // If individual components exist, format them properly
+      
       if (hasStreetAddress || hasCity || hasState || hasZipCode) {
-        // Standard American address format: 
-        // Street Address (+ Apartment/Suite), City, State ZIP
+        
+        
         let streetPart = hasStreetAddress || '';
         if (hasApt) {
           streetPart += `, ${hasApt}`;
@@ -75,16 +74,16 @@ export default function UserDashboardPage() {
         let cityStatePart = '';
         if (hasCity) cityStatePart += hasCity;
         if (hasState) {
-          // Format as "City, State"
+          
           cityStatePart += cityStatePart ? `, ${hasState}` : hasState;
         }
         
-        // For ZIP code, we don't use a comma before it in American format
+        
         if (hasZipCode) {
           cityStatePart += ` ${hasZipCode}`;
         }
         
-        // Put it all together
+        
         let addressParts = [];
         if (streetPart) addressParts.push(streetPart);
         if (cityStatePart) addressParts.push(cityStatePart);
@@ -113,7 +112,7 @@ export default function UserDashboardPage() {
 
   const handleUpdateProfile = async (data: Record<string, any>) => {
     try {
-      // Merge the updated data with the existing user data
+      
       const updatedFormData = {
         ...userData,
         ...data
@@ -135,7 +134,7 @@ export default function UserDashboardPage() {
         throw new Error('Failed to update profile')
       }
 
-      // Refresh user data
+      
       await fetchUserData()
       
       return true
@@ -148,7 +147,7 @@ export default function UserDashboardPage() {
 
   const handleLogout = async () => {
     try {
-      // No actual logout for this demo app
+      
       router.push('/')
       return Promise.resolve()
     } catch (error) {
@@ -204,11 +203,11 @@ export default function UserDashboardPage() {
             className="text-gray-700 dark:text-gray-300"
           >
             {isMobileMenuOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http:
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http:
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
@@ -222,7 +221,7 @@ export default function UserDashboardPage() {
               <div className="p-4 border-b dark:border-gray-700">
                 <div className="flex justify-end">
                   <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http:
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -267,7 +266,7 @@ export default function UserDashboardPage() {
                         }}
                         className="hidden"
                       />
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <svg xmlns="http:
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </label>
