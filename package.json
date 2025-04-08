@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "rm -rf node_modules/.cache && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -15,7 +16,6 @@
     "@auth/mongodb-adapter": "^3.8.0",
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
-    "@next/swc-darwin-arm64": "^15.2.4",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
     "@types/react-beautiful-dnd": "^13.1.8",
