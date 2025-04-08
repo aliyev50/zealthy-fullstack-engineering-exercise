@@ -319,15 +319,15 @@ export default function UserDashboardPage() {
 
         {/* Desktop Sidebar - Hidden on Mobile */}
         <div className="hidden md:block">
-          <UserSidebar 
-            email={userData.email}
-            name={userData.name}
-            profileImage={userData.profileImage}
-            onUpdateProfile={handleUpdateProfile}
+        <UserSidebar 
+          email={userData.email}
+          name={userData.name}
+          profileImage={userData.profileImage}
+          onUpdateProfile={handleUpdateProfile}
             onLogout={handleLogout}
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-          />
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+        />
         </div>
         
         {/* Main Content */}

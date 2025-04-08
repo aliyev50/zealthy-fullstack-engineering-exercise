@@ -45,27 +45,69 @@ export default function HomePage() {
     }
 
     try {
-      // Check if user has existing progress
-      const response = await fetch(`/api/user-progress?email=${encodeURIComponent(email)}`)
-      if (response.ok) {
-        const progress = await response.json()
-        if (progress && progress._id) {
-          // User exists, check if they completed onboarding
-          if (progress.status === 'completed') {
-            // Redirect to new user dashboard if onboarding is completed
+      // First try to log in with the credentials
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      
+      const loginData = await loginResponse.json()
+      
+      if (loginResponse.ok) {
+        // Login successful
+        console.log('Login successful:', loginData)
+        
+        // Check if user has completed onboarding
+        const progressResponse = await fetch(`/api/user-progress?email=${encodeURIComponent(email)}`)
+        if (progressResponse.ok) {
+          const progress = await progressResponse.json()
+          if (progress && progress.status === 'completed') {
+            // User completed onboarding, go to dashboard
             router.push(`/user-dashboard?email=${encodeURIComponent(email)}`)
           } else {
-            // Continue onboarding if not completed
+            // User didn't complete onboarding
             router.push(`/onboarding?email=${encodeURIComponent(email)}`)
           }
+        } else {
+          // No progress found, start onboarding
+          router.push(`/onboarding?email=${encodeURIComponent(email)}`)
+        }
+        return
+      } else if (loginResponse.status === 404) {
+        // User doesn't exist, try to register them
+        const registerResponse = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        })
+        
+        const registerData = await registerResponse.json()
+        
+        if (registerResponse.ok) {
+          // Registration successful, start onboarding
+          console.log('Registration successful:', registerData)
+          router.push(`/onboarding?email=${encodeURIComponent(email)}`)
+          return
+        } else {
+          // Registration failed
+          setError(registerData.error || 'Failed to register. Please try again.')
+          setCheckingProgress(false)
           return
         }
+      } else if (loginResponse.status === 401) {
+        // Invalid password
+        setError('Invalid password. Please try again.')
+        setCheckingProgress(false)
+        return
+      } else {
+        // Other login error
+        setError(loginData.error || 'An error occurred. Please try again.')
+        setCheckingProgress(false)
+        return
       }
-
-      // New user, start onboarding
-      router.push(`/onboarding?email=${encodeURIComponent(email)}`)
     } catch (error) {
-      console.error('Error checking user progress:', error)
+      console.error('Error during authentication:', error)
       setError('An error occurred. Please try again.')
       setCheckingProgress(false)
     }
@@ -84,7 +126,7 @@ export default function HomePage() {
 
         <div className="my-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome</h1>
-          <p className="text-lg text-gray-600 mb-8">Enter your credentials to get started with Zhealthy</p>
+          <p className="text-lg text-gray-600 mb-8">Enter your credentials to get started with Zealthy</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
