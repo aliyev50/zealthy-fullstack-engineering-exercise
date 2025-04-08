@@ -1,10 +1,15 @@
 import { MongoClient } from 'mongodb'
 
+// Check for MongoDB URI and provide a more helpful error message
 if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your Mongo URI to .env.local')
+  if (process.env.NODE_ENV === 'production') {
+    console.error('WARNING: Missing MONGODB_URI environment variable in production mode')
+  } else {
+    throw new Error('Please add your Mongo URI to .env.local')
+  }
 }
 
-const uri = process.env.MONGODB_URI
+const uri = process.env.MONGODB_URI || ''
 const options = {}
 
 let client
@@ -31,8 +36,13 @@ if (process.env.NODE_ENV === 'development') {
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export const connectToDatabase = async () => {
-  const client = await clientPromise
-  return { client, db: client.db() }
+  try {
+    const client = await clientPromise
+    return { client, db: client.db() }
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error)
+    throw new Error('Database connection failed. Please check your MongoDB URI.')
+  }
 }
 
 export default clientPromise 
