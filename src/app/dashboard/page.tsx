@@ -30,16 +30,15 @@ export default function UserDashboardPage() {
   }, [email, router])
 
   useEffect(() => {
-    // Update cache key when profile image changes
     if (userData.profileImage) {
-      setImageCacheKey(Date.now());
+      setImageCacheKey(Date.now())
     }
-  }, [userData.profileImage]);
+  }, [userData.profileImage])
 
   const getImageUrlWithCacheBusting = (url: string | undefined) => {
-    if (!url) return '/default-avatar.png';
-    return `${url}?v=${imageCacheKey}`;
-  };
+    if (!url) return '/default-avatar.png'
+    return `${url}?v=${imageCacheKey}`
+  }
 
   const fetchUserData = async () => {
     try {
@@ -60,46 +59,44 @@ export default function UserDashboardPage() {
         return
       }
       
-
       const formData = data.formData || {}
       
+      let formattedAddress = formData.address || formData.Address || ''
       
-      let formattedAddress = formData.address || formData.Address || '';
       
-      
-      const hasStreetAddress = formData['Street Address'] || formData.street;
-      const hasApt = formData['Apartment'] || formData.apt || formData.unit || formData.suite;
-      const hasCity = formData['City'] || formData.city;
-      const hasState = formData['State'] || formData.state;
-      const hasZipCode = formData['Zip Code'] || formData.zipCode || formData.zip;
+      const hasStreetAddress = formData['Street Address'] || formData.street
+      const hasApt = formData['Apartment'] || formData.apt || formData.unit || formData.suite
+      const hasCity = formData['City'] || formData.city
+      const hasState = formData['State'] || formData.state
+      const hasZipCode = formData['Zip Code'] || formData.zipCode || formData.zip
       
       
       if (hasStreetAddress || hasCity || hasState || hasZipCode) {
         
         
-        let streetPart = hasStreetAddress || '';
+        let streetPart = hasStreetAddress || ''
         if (hasApt) {
-          streetPart += `, ${hasApt}`;
+          streetPart += `, ${hasApt}`
         }
         
-        let cityStatePart = '';
-        if (hasCity) cityStatePart += hasCity;
+        let cityStatePart = ''
+        if (hasCity) cityStatePart += hasCity
         if (hasState) {
           
-          cityStatePart += cityStatePart ? `, ${hasState}` : hasState;
+          cityStatePart += cityStatePart ? `, ${hasState}` : hasState
         }
         
         
         if (hasZipCode) {
-          cityStatePart += ` ${hasZipCode}`;
+          cityStatePart += ` ${hasZipCode}`
         }
         
         
-        let addressParts = [];
-        if (streetPart) addressParts.push(streetPart);
-        if (cityStatePart) addressParts.push(cityStatePart);
+        let addressParts = []
+        if (streetPart) addressParts.push(streetPart)
+        if (cityStatePart) addressParts.push(cityStatePart)
         
-        formattedAddress = addressParts.join(', ');
+        formattedAddress = addressParts.join(', ')
       }
       
       setUserData({
@@ -144,15 +141,15 @@ export default function UserDashboardPage() {
         throw new Error('Failed to update profile')
       }
 
-      // Force immediate UI update for profileImage
+      
       if (data.profileImage) {
         setUserData(prevData => ({
           ...prevData,
           profileImage: data.profileImage
-        }));
+        }))
       }
       
-      // Then fetch fresh data from server
+      
       await fetchUserData()
       
       return true
@@ -261,32 +258,32 @@ export default function UserDashboardPage() {
                         type="file"
                         accept="image/*"
                         onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
+                          const file = e.target.files?.[0]
+                          if (!file) return
                           
                           try {
-                            const formData = new FormData();
-                            formData.append('avatar', file);
+                            const formData = new FormData()
+                            formData.append('avatar', file)
                             
                             const response = await fetch('/api/upload', {
                               method: 'POST',
                               body: formData
-                            });
+                            })
                             
                             if (!response.ok) {
-                              throw new Error('Failed to upload image');
+                              throw new Error('Failed to upload image')
                             }
                             
-                            const { url } = await response.json();
-                            await handleUpdateProfile({ profileImage: url });
+                            const { url } = await response.json()
+                            await handleUpdateProfile({ profileImage: url })
                           } catch (error) {
-                            console.error('Failed to upload image:', error);
-                            setError('Failed to upload image. Please try again.');
+                            console.error('Failed to upload image:', error)
+                            setError('Failed to upload image. Please try again.')
                           }
                         }}
                         className="hidden"
                       />
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </label>
@@ -298,8 +295,8 @@ export default function UserDashboardPage() {
                 <div className="space-y-2">
                   <button
                     onClick={() => {
-                      setActiveSection('profile');
-                      setIsMobileMenuOpen(false);
+                      setActiveSection('profile')
+                      setIsMobileMenuOpen(false)
                     }}
                     className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
                       activeSection === 'profile'
@@ -311,8 +308,8 @@ export default function UserDashboardPage() {
                   </button>
                   <button
                     onClick={() => {
-                      setActiveSection('settings');
-                      setIsMobileMenuOpen(false);
+                      setActiveSection('settings')
+                      setIsMobileMenuOpen(false)
                     }}
                     className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
                       activeSection === 'settings'

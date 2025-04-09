@@ -53,7 +53,6 @@ export default function DataPage() {
       const result = await response.json()
       setSuccessMessage(result.message || 'All data has been cleared successfully')
       
-      // Refresh the data table
       await fetchData()
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to clear data')

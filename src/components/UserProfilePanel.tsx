@@ -105,18 +105,16 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
     }));
   };
 
-  // Helper function to format address for display
   const formatAddress = (address: UserProfilePanelProps['userData']['address']): string => {
     if (!address) return '';
     if (typeof address === 'string') return address;
     
-    // Format object address as a string
     const parts = [
       address.street,
       address.city,
       address.state,
       address.zip
-    ].filter(Boolean); // Remove empty parts
+    ].filter(Boolean)
     
     return parts.join(', ');
   };

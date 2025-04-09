@@ -9,7 +9,6 @@ const nextConfig = {
     COOKIE_SECRET: process.env.COOKIE_SECRET
   },
   webpack: (config) => {
-    // Ignore MongoDB's optional dependencies warnings
     config.ignoreWarnings = [
       { module: /mongodb/ },
       { message: /mongodb/ }

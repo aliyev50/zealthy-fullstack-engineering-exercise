@@ -19,21 +19,17 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    // Create uploads directory if it doesn't exist
     const uploadDir = path.join(process.cwd(), 'public/uploads')
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true })
     }
     
-    // Generate a unique filename with original extension
     const fileExt = file.name.split('.').pop() || 'jpg'
     const fileName = `${randomUUID()}.${fileExt}`
     const filePath = path.join(uploadDir, fileName)
     
-    // Write the file to disk
     await writeFile(filePath, new Uint8Array(buffer))
     
-    // Return the URL to the uploaded file
     const fileUrl = `/uploads/${fileName}`
     
     return NextResponse.json({ 

@@ -24,7 +24,6 @@ export default function OnboardingPage() {
   useEffect(() => {
     setMounted(true)
     
-    // Fetch user data if email is provided
     if (email) {
       fetchUserData()
     }
@@ -77,7 +76,6 @@ export default function OnboardingPage() {
   }
 
   const handleSaveProgress = async (data: Record<string, any>) => {
-    // Update local state with the latest form data
     setFormData(data)
     
     if (!email) return
@@ -227,7 +225,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setError('') // Clear errors when navigating
+                    setError('')
                     setCurrentPage(prev => {
                       const newPage = prev - 1
                       setProgress((newPage - 1) / maxPage * 100)
