@@ -1,19 +1,44 @@
 import { NextResponse } from 'next/server'
+import { writeFile } from 'fs/promises'
+import path from 'path'
+import { existsSync, mkdirSync } from 'fs'
+import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
   try {
-    // In a real app, this would handle file upload to a storage service
-    // For this demo, we'll just return a placeholder image
+    const formData = await request.formData()
+    const file = formData.get('avatar') as File
     
-    // Get a random placeholder avatar
-    const avatarId = Math.floor(Math.random() * 100)
-    const imageUrl = `https://i.pravatar.cc/300?img=${avatarId}`
+    if (!file) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'No file uploaded' 
+      }, { status: 400 })
+    }
     
-    console.log('Mock image upload successful, returning URL:', imageUrl)
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    
+    // Create uploads directory if it doesn't exist
+    const uploadDir = path.join(process.cwd(), 'public/uploads')
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true })
+    }
+    
+    // Generate a unique filename with original extension
+    const fileExt = file.name.split('.').pop() || 'jpg'
+    const fileName = `${randomUUID()}.${fileExt}`
+    const filePath = path.join(uploadDir, fileName)
+    
+    // Write the file to disk
+    await writeFile(filePath, new Uint8Array(buffer))
+    
+    // Return the URL to the uploaded file
+    const fileUrl = `/uploads/${fileName}`
     
     return NextResponse.json({ 
       success: true, 
-      url: imageUrl,
+      url: fileUrl,
       message: 'Image uploaded successfully' 
     })
   } catch (error) {

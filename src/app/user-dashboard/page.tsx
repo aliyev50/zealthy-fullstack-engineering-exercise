@@ -18,9 +18,9 @@ export default function UserDashboardPage() {
   const [activeSection, setActiveSection] = useState('profile')
   const [error, setError] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [imageCacheKey, setImageCacheKey] = useState(Date.now())
 
   useEffect(() => {
-    console.log('User dashboard loaded with email param:', email)
     if (!email) {
       console.error('No email parameter found in URL, redirecting to homepage')
       router.push('/')
@@ -29,10 +29,21 @@ export default function UserDashboardPage() {
     fetchUserData()
   }, [email, router])
 
+  useEffect(() => {
+    // Update cache key when profile image changes
+    if (userData.profileImage) {
+      setImageCacheKey(Date.now());
+    }
+  }, [userData.profileImage]);
+
+  const getImageUrlWithCacheBusting = (url: string | undefined) => {
+    if (!url) return '/default-avatar.png';
+    return `${url}?v=${imageCacheKey}`;
+  };
+
   const fetchUserData = async () => {
     try {
       setLoading(true)
-      console.log('Fetching user data for email:', email)
       const response = await fetch(`/api/user-progress?email=${encodeURIComponent(email!)}`)
       
       if (!response.ok) {
@@ -41,7 +52,6 @@ export default function UserDashboardPage() {
       }
       
       const data = await response.json()
-      console.log('User data received:', data)
       
       if (!data || !data.email) {
         console.error('Invalid user data received:', data)
@@ -112,8 +122,7 @@ export default function UserDashboardPage() {
   }
 
   const handleUpdateProfile = async (data: Record<string, any>) => {
-    try {
-      
+    try {      
       const updatedFormData = {
         ...userData,
         ...data
@@ -135,7 +144,15 @@ export default function UserDashboardPage() {
         throw new Error('Failed to update profile')
       }
 
+      // Force immediate UI update for profileImage
+      if (data.profileImage) {
+        setUserData(prevData => ({
+          ...prevData,
+          profileImage: data.profileImage
+        }));
+      }
       
+      // Then fetch fresh data from server
       await fetchUserData()
       
       return true
@@ -190,9 +207,10 @@ export default function UserDashboardPage() {
         <div className="md:hidden bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-4 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center">
             <img
-              src={userData.profileImage || '/default-avatar.png'}
+              src={getImageUrlWithCacheBusting(userData.profileImage)}
               alt={userData.name || 'User'}
               className="w-10 h-10 rounded-full object-cover mr-3"
+              key={userData.profileImage || 'default-avatar'}
               onError={(e) => {
                 e.currentTarget.src = '/default-avatar.png'
               }}
@@ -230,9 +248,10 @@ export default function UserDashboardPage() {
                 <div className="flex flex-col items-center mt-4">
                   <div className="relative w-24 h-24 mb-4">
                     <img
-                      src={userData.profileImage || '/default-avatar.png'}
+                      src={getImageUrlWithCacheBusting(userData.profileImage)}
                       alt={userData.name || 'User'}
                       className="w-full h-full rounded-full object-cover"
+                      key={userData.profileImage || 'default-avatar'}
                       onError={(e) => {
                         e.currentTarget.src = '/default-avatar.png'
                       }}

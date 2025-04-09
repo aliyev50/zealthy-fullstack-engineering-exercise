@@ -53,8 +53,6 @@ export default function HomePage() {
       const loginData = await loginResponse.json()
       
       if (loginResponse.ok) {
-        console.log('Login successful:', loginData)
-        
         const progressResponse = await fetch(`/api/user-progress?email=${encodeURIComponent(email)}`)
         if (progressResponse.ok) {
           const progress = await progressResponse.json()
@@ -77,7 +75,6 @@ export default function HomePage() {
         const registerData = await registerResponse.json()
         
         if (registerResponse.ok) {
-          console.log('Registration successful:', registerData)
           router.push(`/onboarding?email=${encodeURIComponent(email)}`)
           return
         } else {
@@ -239,7 +236,7 @@ export default function HomePage() {
               href="/admin"
               className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
             >
-              Admin Dashboard →
+              Admin Dashboard
             </Link>
             
             <div className="flex flex-col md:flex-row md:space-x-4">
@@ -247,13 +244,13 @@ export default function HomePage() {
                 href="/user-dashboard?email=demo@example.com"
                 className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
               >
-                User Dashboard →
+                User Dashboard
               </Link>
               <Link
                 href="/data"
                 className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
               >
-                View Data →
+                View Data
               </Link>
             </div>
           </div>
@@ -282,7 +279,7 @@ export default function HomePage() {
                         <div className="relative bg-white p-4">
                           <h3 className="text-sm font-medium text-gray-900">Terms of Service</h3>
                           <p className="mt-1 text-sm text-gray-500">
-                            By using Zhealthy, you agree to our terms of service and privacy policy.
+                            By using Zealthy, you agree to our terms of service and privacy policy.
                           </p>
                         </div>
                       </div>
@@ -335,7 +332,7 @@ export default function HomePage() {
             <div className="bg-white/90 p-8 rounded-lg max-w-md shadow-lg backdrop-blur-sm">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Health Portal</h2>
               <p className="text-gray-700 mb-6">
-                The Zhealthy portal is your digital health assistant. Manage appointments, 
+                The Zealthy portal is your digital health assistant. Manage appointments, 
                 view medical records, and communicate with your healthcare providers.
               </p>
               <div className="flex items-center space-x-6">
@@ -344,32 +341,9 @@ export default function HomePage() {
                 </div>
                 <div className="flex-1">
                   <div className="h-1 bg-gray-200 rounded">
-                    <div className="h-1 bg-[#006A71] rounded" style={{ width: '25%' }}></div>
+                    <div className="h-1 bg-[#006A71] rounded w-[25%]"></div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </Transition>
-
-        <Transition
-          show={true}
-          appear={true}
-          enter="transition-all duration-1000 delay-1000"
-          enterFrom="opacity-0 translate-y-4"
-          enterTo="opacity-100 translate-y-0"
-        >
-          <div className="absolute bottom-10 left-0 right-0 p-8">
-            <div className="bg-white/80 rounded-lg p-6 backdrop-blur-sm">
-              <p className="text-center text-sm text-gray-500 mb-6">Trusted by leading healthcare providers</p>
-              <div className="flex justify-between items-center space-x-8">
-                {[1, 2, 3, 4, 5].map((_, index) => (
-                  <div key={index} className="flex-1 h-6 flex items-center justify-center grayscale opacity-70">
-                    <div className="h-6 w-20 bg-gray-300 rounded flex items-center justify-center text-xs text-gray-600 font-medium">
-                      Provider {index + 1}
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>

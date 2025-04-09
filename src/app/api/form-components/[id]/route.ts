@@ -9,7 +9,6 @@ export async function DELETE(
   try {
     const { db } = await connectToDatabase()
     const collection = db.collection('form_components')
-    console.log(111, collection)
     const result = await collection.deleteOne({
       _id: new ObjectId(params.id)
     })
@@ -43,14 +42,10 @@ export async function PUT(
     const collection = db.collection('form_components')
     const updates = await request.json()
 
-    console.log('Updating component:', params.id, updates)
-
     const result = await collection.updateOne(
       { _id: new ObjectId(params.id) },
       { $set: updates }
     )
-
-    console.log('Update result:', result)
 
     if (result.matchedCount === 0) {
       return NextResponse.json(

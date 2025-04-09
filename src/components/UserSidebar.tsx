@@ -31,11 +31,24 @@ export default function UserSidebar({
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [imageCacheKey, setImageCacheKey] = useState(Date.now())
   
   useEffect(() => {
     setMounted(true)
     setEditedName(name || '')
   }, [name])
+
+  useEffect(() => {
+    // Update cache key when profileImage changes to prevent browser caching
+    if (profileImage) {
+      setImageCacheKey(Date.now());
+    }
+  }, [profileImage]);
+
+  const getImageUrlWithCacheBusting = (url: string | undefined) => {
+    if (!url) return '/default-avatar.png';
+    return `${url}?v=${imageCacheKey}`;
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -56,7 +69,7 @@ export default function UserSidebar({
       }
 
       const { url } = await response.json()
-      await onUpdateProfile({ avatar: url })
+      await onUpdateProfile({ profileImage: url })
     } catch (error) {
       console.error('Failed to upload image:', error)
     } finally {
@@ -99,8 +112,9 @@ export default function UserSidebar({
       <div className="p-6 border-b dark:border-gray-700">
         <div className="relative w-32 h-32 mx-auto mb-4">
           <img
-            src={profileImage || '/default-avatar.png'}
+            src={getImageUrlWithCacheBusting(profileImage)}
             alt={name || 'User'}
+            key={profileImage || 'default-avatar'}
             className="w-full h-full rounded-full object-cover"
             onError={(e) => {
               e.currentTarget.src = '/default-avatar.png'

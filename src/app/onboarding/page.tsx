@@ -113,16 +113,12 @@ export default function OnboardingPage() {
   }
 
   const handleSubmit = async () => {
-    console.log('Submit function called', { email, formData })
-    
     if (!email) {
-      console.log('No email provided, redirecting to dashboard anyway')
       router.push('/user-dashboard')
       return
     }
 
     try {
-      console.log('Submitting form data to API...')
       const response = await fetch('/api/user-progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,15 +131,13 @@ export default function OnboardingPage() {
         }),
       })
 
-      console.log('API response status:', response.status)
-      
+
       if (!response.ok) {
         const errorText = await response.text()
         console.error('API error:', errorText)
         throw new Error(`Failed to submit form: ${errorText}`)
       }
 
-      console.log('Form submitted successfully, redirecting to dashboard')
       router.push(`/user-dashboard?email=${encodeURIComponent(email)}`)
     } catch (error) {
       console.error('Failed to submit form:', error)

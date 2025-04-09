@@ -5,7 +5,6 @@ const connectDB = async () => {
   try {
     if (mongoose.connections[0].readyState) return
     await mongoose.connect(process.env.MONGODB_URI as string)
-    console.log('MongoDB connected successfully')
   } catch (error) {
     console.error('MongoDB connection error:', error)
   }
@@ -30,8 +29,6 @@ export async function GET(request: Request) {
     const email = searchParams.get('email')
     const fetchAll = searchParams.get('fetchAll') === 'true'
     
-    console.log('GET - Searching for email:', email, 'fetchAll:', fetchAll)
-
     await connectDB()
     
     if (fetchAll || !email) {
@@ -61,8 +58,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    console.log('POST - Saving progress for:', body)
-    
+  
     const email = body.email || body.userId
     
     if (!email) {
@@ -80,21 +76,12 @@ export async function POST(request: Request) {
       status: body.status || (body.completed ? 'completed' : 'in_progress')
     }
     
-    console.log('POST - Updating with data:', updateData)
-    
     const progress = await UserProgress.findOneAndUpdate(
       { email },
       updateData,
       { new: true, upsert: true }
     )
     
-    console.log('POST - Progress saved successfully:', {
-      email: progress.email,
-      currentPage: progress.currentPage,
-      completed: progress.completed,
-      status: progress.status
-    })
-
     return NextResponse.json(progress)
   } catch (error) {
     console.error('POST error:', error)
@@ -111,7 +98,6 @@ export async function DELETE(request: Request) {
     await connectDB();
     
     if (all === 'true') {
-      console.log('DELETE - Removing all user progress data');
       const result = await UserProgress.deleteMany({});
       return NextResponse.json({ 
         success: true, 
@@ -120,8 +106,7 @@ export async function DELETE(request: Request) {
     }
     
     if (email) {
-      console.log(`DELETE - Removing user progress data for: ${email}`);
-      const result = await UserProgress.deleteOne({ email });
+      const result = await UserProgress.deleteOne({ email })
       
       if (result.deletedCount === 0) {
         return NextResponse.json({ 
