@@ -114,7 +114,7 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     if (!email) {
-      router.push('/user-dashboard')
+      router.push('/dashboard')
       return
     }
 
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
         throw new Error(`Failed to submit form: ${errorText}`)
       }
 
-      router.push(`/user-dashboard?email=${encodeURIComponent(email)}`)
+      router.push(`/dashboard?email=${encodeURIComponent(email)}`)
     } catch (error) {
       console.error('Failed to submit form:', error)
       setError(error instanceof Error ? error.message : 'Failed to submit form')

@@ -38,7 +38,7 @@ export default function SuccessPage() {
           
           <div className="space-y-4">
             <Link
-              href={`/user-dashboard?email=${encodeURIComponent(email || '')}`}
+              href={`/dashboard?email=${encodeURIComponent(email || '')}`}
               className="block w-full bg-[#006A71] text-white px-6 py-2 rounded-md hover:bg-[#006A71]/90 transition-colors"
             >
               Go to Dashboard

@@ -1,10 +1,10 @@
-# Zealthy - An admin App Onboarding System
+# Admin App Onboarding System
 
-An admin and user management application built with Next.js, TypeScript, and MongoDB, featuring a customizable onboarding flow.
+A comprehensive admin and user management application built with Next.js, TypeScript, and MongoDB, featuring a customizable onboarding flow.
 
 ## Features
 
-- Multi-step onboarding process
+- Multi-step onboarding process for new users
 - User dashboard with profile management
 - Admin interface to manage component placement and user data
 - Light/dark theme support
@@ -56,9 +56,8 @@ The application will be available at `http://localhost:3000`
 
 - `/` - Main onboarding flow entry point
 - `/onboarding` - User onboarding process
-- `/user-dashboard` - User profile and settings dashboard
+- `/dashboard` - User profile and settings dashboard
 - `/admin` - Admin interface for configuring component placement
-- `/dashboard` - Admin dashboard for monitoring user progress
 - `/data` - Data table showing all user submissions
 
 ## Project Structure
@@ -68,14 +67,12 @@ src/
 ├── app/                    # Next.js app directory
 │   ├── api/                # API routes
 │   ├── admin/              # Admin configuration page
-│   ├── dashboard/          # Admin dashboard
+│   ├── dashboard/          # User dashboard for profile and settings
 │   ├── data/               # Data table page
 │   ├── onboarding/         # User onboarding flows
-│   ├── user-dashboard/     # User profile and settings
 │   ├── globals.css         # Global styles
 │   └── page.tsx            # Main landing page
 ├── components/             # Reusable components
-│   ├── DashboardPanel.tsx  # Dashboard components
 │   ├── DynamicForm.tsx     # Dynamic form builder
 │   ├── OnboardingForm.tsx  # Onboarding forms
 │   ├── OnboardingSteps.tsx # Step navigation

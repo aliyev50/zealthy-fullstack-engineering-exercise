@@ -57,7 +57,7 @@ export default function HomePage() {
         if (progressResponse.ok) {
           const progress = await progressResponse.json()
           if (progress && progress.status === 'completed') {
-            router.push(`/user-dashboard?email=${encodeURIComponent(email)}`)
+            router.push(`/dashboard?email=${encodeURIComponent(email)}`)
           } else {
             router.push(`/onboarding?email=${encodeURIComponent(email)}`)
           }
@@ -241,7 +241,7 @@ export default function HomePage() {
             
             <div className="flex flex-col md:flex-row md:space-x-4">
               <Link
-                href="/user-dashboard?email=demo@example.com"
+                href="/dashboard?email=demo@example.com"
                 className="text-[#006A71] hover:text-[#005a60] transition-colors hover:underline"
               >
                 User Dashboard

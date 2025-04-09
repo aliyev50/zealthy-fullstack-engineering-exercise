@@ -2,407 +2,389 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
+import UserSidebar from '@/components/UserSidebar'
+import UserProfilePanel from '@/components/UserProfilePanel'
+import SettingsPanel from '@/components/SettingsPanel'
+import { ThemeProvider } from '@/context/ThemeContext'
 import Link from 'next/link'
-import { UserProgress } from '@/types'
-import AnalogClock from './components/AnalogClock'
 
-export default function DashboardPage() {
+export default function UserDashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
   
-  const [userProgress, setUserProgress] = useState<UserProgress | null>(null)
+  const [userData, setUserData] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(false)
-  const [editedData, setEditedData] = useState<Record<string, any>>({})
-  const [profileImage, setProfileImage] = useState<string | null>(null)
-  const [imageLoading, setImageLoading] = useState(false)
-  const [activeSection, setActiveSection] = useState('home')
-  const [currentTime, setCurrentTime] = useState(new Date())
-
-  // Time zones for world clock
-  const timeZones = [
-    { city: 'New York', zone: 'America/New_York' },
-    { city: 'London', zone: 'Europe/London' },
-    { city: 'Tokyo', zone: 'Asia/Tokyo' },
-    { city: 'Moscow', zone: 'Europe/Moscow' }
-  ]
+  const [activeSection, setActiveSection] = useState('profile')
+  const [error, setError] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [imageCacheKey, setImageCacheKey] = useState(Date.now())
 
   useEffect(() => {
     if (!email) {
+      console.error('No email parameter found in URL, redirecting to homepage')
       router.push('/')
       return
     }
     fetchUserData()
+  }, [email, router])
 
-    // Update time every second
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
+  useEffect(() => {
+    // Update cache key when profile image changes
+    if (userData.profileImage) {
+      setImageCacheKey(Date.now());
+    }
+  }, [userData.profileImage]);
 
-    return () => clearInterval(timer)
-  }, [email])
+  const getImageUrlWithCacheBusting = (url: string | undefined) => {
+    if (!url) return '/default-avatar.png';
+    return `${url}?v=${imageCacheKey}`;
+  };
 
   const fetchUserData = async () => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/user-progress?email=${encodeURIComponent(email!)}`)
-      if (response.ok) {
-        const data = await response.json()
-        setUserProgress(data)
-        setEditedData(data.formData || {})
-        if (data.formData?.profileImage) {
-          setProfileImage(data.formData.profileImage)
-        }
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch user data: ${response.status} ${response.statusText}`)
+        throw new Error('Failed to fetch user data')
       }
+      
+      const data = await response.json()
+      
+      if (!data || !data.email) {
+        console.error('Invalid user data received:', data)
+        setError('User data not found. Please try again or contact support.')
+        setLoading(false)
+        return
+      }
+      
+
+      const formData = data.formData || {}
+      
+      
+      let formattedAddress = formData.address || formData.Address || '';
+      
+      
+      const hasStreetAddress = formData['Street Address'] || formData.street;
+      const hasApt = formData['Apartment'] || formData.apt || formData.unit || formData.suite;
+      const hasCity = formData['City'] || formData.city;
+      const hasState = formData['State'] || formData.state;
+      const hasZipCode = formData['Zip Code'] || formData.zipCode || formData.zip;
+      
+      
+      if (hasStreetAddress || hasCity || hasState || hasZipCode) {
+        
+        
+        let streetPart = hasStreetAddress || '';
+        if (hasApt) {
+          streetPart += `, ${hasApt}`;
+        }
+        
+        let cityStatePart = '';
+        if (hasCity) cityStatePart += hasCity;
+        if (hasState) {
+          
+          cityStatePart += cityStatePart ? `, ${hasState}` : hasState;
+        }
+        
+        
+        if (hasZipCode) {
+          cityStatePart += ` ${hasZipCode}`;
+        }
+        
+        
+        let addressParts = [];
+        if (streetPart) addressParts.push(streetPart);
+        if (cityStatePart) addressParts.push(cityStatePart);
+        
+        formattedAddress = addressParts.join(', ');
+      }
+      
+      setUserData({
+        email: data.email,
+        name: formData.name || formData.Name || formData.fullName || formData['Full Name'] || '',
+        about: formData.about || formData.About || formData.bio || formData.Bio || '',
+        address: formattedAddress,
+        phone: formData.phone || formData.Phone || formData['Phone Number'] || '',
+        profileImage: formData.profileImage || formData.avatar || '',
+        birthdate: formData.birthdate || formData.Birthdate || formData['Birthdate'] || '',
+        role: formData.role || formData.Role || 'User',
+        ...formData
+      })
     } catch (error) {
       console.error('Failed to fetch user data:', error)
+      setError('Failed to load user data. Please try again later.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setImageLoading(true)
-    try {
-      const reader = new FileReader()
-      reader.onloadend = async () => {
-        const base64String = reader.result as string
-        setProfileImage(base64String)
-        await saveProgress({
-          ...editedData,
-          profileImage: base64String
-        })
+  const handleUpdateProfile = async (data: Record<string, any>) => {
+    try {      
+      const updatedFormData = {
+        ...userData,
+        ...data
       }
-      reader.readAsDataURL(file)
-    } catch (error) {
-      console.error('Failed to upload image:', error)
-    } finally {
-      setImageLoading(false)
-    }
-  }
-
-  const saveProgress = async (data: Record<string, any>) => {
-    try {
+      
       const response = await fetch('/api/user-progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          currentPage: userProgress?.currentPage || 1,
-          formData: data,
-          completed: userProgress?.completed || false,
+          currentPage: userData.currentPage || 1,
+          formData: updatedFormData,
+          completed: true,
+          status: 'completed'
         }),
       })
 
-      if (response.ok) {
-        setEditedData(data)
-        setEditing(false)
-        await fetchUserData()
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
       }
+
+      // Force immediate UI update for profileImage
+      if (data.profileImage) {
+        setUserData(prevData => ({
+          ...prevData,
+          profileImage: data.profileImage
+        }));
+      }
+      
+      // Then fetch fresh data from server
+      await fetchUserData()
+      
+      return true
     } catch (error) {
-      console.error('Failed to save progress:', error)
+      console.error('Failed to update profile:', error)
+      setError('Failed to update profile. Please try again later.')
+      return false
     }
   }
 
-  const handleSave = async () => {
-    await saveProgress(editedData)
-  }
-
-  const formatTimeForZone = (zone: string) => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: true,
-      timeZone: zone
-    }).format(currentTime)
-  }
-
-  const generateCalendar = () => {
-    const today = new Date()
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-    const daysInMonth = lastDay.getDate()
-    const startingDay = firstDay.getDay()
-    
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ]
-
-    const days = []
-    for (let i = 0 ; i < startingDay; i++) {
-      days.push(null)
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i)
-    }
-
-    return {
-      month: monthNames[today.getMonth()],
-      year: today.getFullYear(),
-      days
+  const handleLogout = async () => {
+    try {
+      
+      router.push('/')
+      return Promise.resolve()
+    } catch (error) {
+      console.error('Error during logout:', error)
+      return Promise.reject(error)
     }
   }
-
-  const calendar = generateCalendar()
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#006A71]"></div>
-      </div>
-    )
-  }
-
-  if (!userProgress) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">User Not Found</h1>
-          <p className="text-gray-600 mb-6">We couldn't find your profile information.</p>
-          <Link href="/" className="text-[#006A71] hover:text-[#005a60]">
-            Return to Home
-          </Link>
+      <ThemeProvider>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#006A71]"></div>
         </div>
-      </div>
+      </ThemeProvider>
     )
   }
 
-  const NavItem = ({ icon, label, badge = null }: { icon: string, label: string, badge?: number | null }) => (
-    <button 
-      onClick={() => setActiveSection(label.toLowerCase())}
-      className={`flex items-center w-full px-4 py-2 text-left rounded-lg ${
-        activeSection === label.toLowerCase() 
-          ? 'bg-[#006A71]/10 text-[#006A71]' 
-          : 'hover:bg-gray-100'
-      }`}
-    >
-      <span className="w-5 h-5 mr-3">{icon}</span>
-      <span>{label}</span>
-      {badge && (
-        <span className="ml-auto bg-[#006A71]/20 text-[#006A71] px-2 py-0.5 rounded-full text-xs">
-          {badge}
-        </span>
-      )}
-    </button>
-  )
+  if (!userData.email) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-center p-8 max-w-md">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">User Not Found</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">We couldn't find your profile information.</p>
+            <Link href="/" className="px-4 py-2 bg-[#006A71] text-white rounded-md hover:bg-[#005a60] transition-colors">
+              Return to Home
+            </Link>
+          </div>
+        </div>
+      </ThemeProvider>
+    )
+  }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 p-4 flex flex-col h-screen sticky top-0">
-        {/* User Profile Section */}
-        <div className="mb-8">
-          <div className="relative w-12 h-12 mb-4">
-            {profileImage ? (
-              <Image
-                src={profileImage}
-                alt="Profile"
-                fill
-                className="rounded-full object-cover"
-              />
+    <ThemeProvider>
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Mobile Hamburger Menu */}
+        <div className="md:hidden bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-4 flex justify-between items-center sticky top-0 z-10">
+          <div className="flex items-center">
+            <img
+              src={getImageUrlWithCacheBusting(userData.profileImage)}
+              alt={userData.name || 'User'}
+              className="w-10 h-10 rounded-full object-cover mr-3"
+              key={userData.profileImage || 'default-avatar'}
+              onError={(e) => {
+                e.currentTarget.src = '/default-avatar.png'
+              }}
+            />
+            <span className="font-medium text-gray-900 dark:text-white">{userData.name}</span>
+          </div>
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-gray-700 dark:text-gray-300"
+          >
+            {isMobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             ) : (
-              <div className="w-12 h-12 rounded-full bg-[#006A71]/10 flex items-center justify-center text-[#006A71]">
-                {email?.charAt(0).toUpperCase()}
-              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             )}
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
-          </div>
-          <div className="text-sm font-medium text-gray-900">{email?.split('@')[0]}</div>
-          <div className="text-xs text-gray-500">Online</div>
+          </button>
         </div>
 
-        {/* Main Navigation Section */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Navigation */}
-          <nav className="space-y-2">
-            <NavItem icon="🏠" label="Home" />
-            <NavItem icon="🤖" label="AI Assistant" />
-            <NavItem icon="👤" label="My Profile" />
-            <NavItem icon="📬" label="Inbox" badge={3} />
-            <NavItem icon="📅" label="Calendar" />
-            <NavItem icon="📊" label="Reports & Analytics" />
-          </nav>
-
-          {/* Projects Section */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-gray-500">My Projects</h2>
-              <button className="text-[#006A71] text-sm hover:text-[#005a60]">+ Add</button>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                <span className="text-sm">Product launch</span>
-              </div>
-              <div className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100">
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span className="text-sm">Team brainstorm</span>
-              </div>
-              <div className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100">
-                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                <span className="text-sm">Branding launch</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Logout Button */}
-        <button
-          onClick={() => router.push('/')}
-          className="mt-8 flex items-start w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        >
-          <span className="w-5 h-5 mr-3">🚪</span>
-          <span>Logout</span>
-        </button>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="text-gray-500">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Hello, {email?.split('@')[0]}</h1>
-            <p className="text-2xl text-[#006A71]">Welcome to your dashboard</p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            {/* User Information Section - Now First and Full Width */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">My Information</h2>
-                {!editing && (
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="text-[#006A71] hover:text-[#005a60] text-sm font-medium"
-                  >
-                    Edit Profile
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="absolute right-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg" onClick={(e) => e.stopPropagation()}>
+              <div className="p-4 border-b dark:border-gray-700">
+                <div className="flex justify-end">
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                {editing ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {Object.entries(editedData).map(([key, value]) => {
-                        if (key === 'profileImage') return null
-                        return (
-                          <div key={key} className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                            </label>
-                            <input
-                              type="text"
-                              value={value as string}
-                              onChange={(e) => setEditedData(prev => ({
-                                ...prev,
-                                [key]: e.target.value
-                              }))}
-                              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#006A71]"
-                            />
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <div className="flex space-x-4">
-                      <button
-                        onClick={handleSave}
-                        className="px-6 py-2 bg-[#006A71] text-white rounded-lg hover:bg-[#005a60] transition-colors"
-                      >
-                        Save Changes
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditedData(userProgress.formData || {})
-                          setEditing(false)
+                </div>
+                <div className="flex flex-col items-center mt-4">
+                  <div className="relative w-24 h-24 mb-4">
+                    <img
+                      src={getImageUrlWithCacheBusting(userData.profileImage)}
+                      alt={userData.name || 'User'}
+                      className="w-full h-full rounded-full object-cover"
+                      key={userData.profileImage || 'default-avatar'}
+                      onError={(e) => {
+                        e.currentTarget.src = '/default-avatar.png'
+                      }}
+                    />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            const formData = new FormData();
+                            formData.append('avatar', file);
+                            
+                            const response = await fetch('/api/upload', {
+                              method: 'POST',
+                              body: formData
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to upload image');
+                            }
+                            
+                            const { url } = await response.json();
+                            await handleUpdateProfile({ profileImage: url });
+                          } catch (error) {
+                            console.error('Failed to upload image:', error);
+                            setError('Failed to upload image. Please try again.');
+                          }
                         }}
-                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {Object.entries(userProgress.formData || {}).map(([key, value]) => {
-                      if (key === 'profileImage') return null
-                      return (
-                        <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                          <dt className="text-sm font-medium text-gray-500">
-                            {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                          </dt>
-                          <dd className="mt-1 text-sm font-medium text-gray-900">
-                            {value as string || 'Not provided'}
-                          </dd>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Utilities Row - Calendar and Clock */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* World Clock Section - More Compact */}
-              <div className="bg-white rounded-lg shadow p-4">
-                <h2 className="text-lg font-semibold mb-3">World Clock</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {timeZones.map(({ city, zone }) => {
-                    const localTime = new Date(currentTime.toLocaleString('en-US', { timeZone: zone }))
-                    return (
-                      <AnalogClock
-                        key={city}
-                        time={localTime}
-                        city={city}
+                        className="hidden"
                       />
-                    )
-                  })}
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </label>
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{userData.name}</h2>
                 </div>
               </div>
-
-              {/* Calendar Widget - More Compact */}
-              <div className="bg-white rounded-lg shadow p-4">
-                <h2 className="text-lg font-semibold mb-3">Calendar</h2>
-                <div className="text-center mb-3">
-                  <h3 className="text-md font-medium text-[#006A71]">
-                    {calendar.month} {calendar.year}
-                  </h3>
+              <nav className="p-4">
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setActiveSection('profile');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      activeSection === 'profile'
+                        ? 'bg-[#006A71] text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveSection('settings');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      activeSection === 'settings'
+                        ? 'bg-[#006A71] text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Settings
+                  </button>
                 </div>
-                <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-xs font-medium text-gray-500">
-                      {day}
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center">
-                  {calendar.days.map((day, index) => (
-                    <div
-                      key={index}
-                      className={`p-1 text-sm ${
-                        day === new Date().getDate() && calendar.month === new Date().toLocaleString('default', { month: 'long' })
-                          ? 'bg-[#006A71] text-white rounded-full'
-                          : day
-                          ? 'hover:bg-gray-100 rounded-full'
-                          : ''
-                      }`}
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
+              </nav>
+              <div className="p-4 border-t dark:border-gray-700 mt-auto">
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+                >
+                  Logout
+                </button>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Desktop Sidebar - Hidden on Mobile */}
+        <div className="hidden md:block">
+        <UserSidebar 
+          email={userData.email}
+          name={userData.name}
+          profileImage={userData.profileImage}
+          onUpdateProfile={handleUpdateProfile}
+            onLogout={handleLogout}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+        />
+        </div>
+        
+        {/* Main Content */}
+        <div className="flex-1 p-4 md:p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+              <p className="text-red-800 dark:text-red-400">{error}</p>
+            </div>
+          )}
+          
+          {activeSection === 'profile' && (
+            <UserProfilePanel 
+              userData={userData}
+              onUpdateProfile={handleUpdateProfile}
+            />
+          )}
+          {activeSection === 'settings' && (
+            <SettingsPanel 
+              userData={userData}
+              onUpdateSettings={handleUpdateProfile}
+            />
+          )}
+          {activeSection !== 'profile' && activeSection !== 'settings' && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">This section is currently under development.</p>
+              <button 
+                onClick={() => setActiveSection('profile')}
+                className="px-4 py-2 bg-[#006A71] text-white rounded-md hover:bg-[#005a60] transition-colors"
+              >
+                Return to Profile
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   )
 } 
