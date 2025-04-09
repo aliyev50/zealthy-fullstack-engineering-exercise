@@ -16,6 +16,7 @@ interface UserProfilePanelProps {
       zip?: string;
     };
     phone?: string;
+    birthdate?: string;
     profileImage?: string;
     [key: string]: any;
   };
@@ -31,6 +32,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
     email: userData.email || '',
     role: userData.role || 'User',
     about: userData.about || '',
+    birthdate: userData.birthdate || '',
     address: typeof userData.address === 'string' 
       ? userData.address 
       : userData.address 
@@ -45,6 +47,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
       email: userData.email || '',
       role: userData.role || 'User',
       about: userData.about || '',
+      birthdate: userData.birthdate || '',
       address: typeof userData.address === 'string' 
         ? userData.address 
         : userData.address 
@@ -61,6 +64,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
       email: userData.email || '',
       role: userData.role || 'User', 
       about: userData.about || '',
+      birthdate: userData.birthdate || '',
       address: typeof userData.address === 'string'
         ? userData.address
         : userData.address
@@ -77,6 +81,7 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
       email: userData.email || '', 
       role: userData.role || 'User',
       about: userData.about || '',
+      birthdate: userData.birthdate || '',
       address: typeof userData.address === 'string'
         ? userData.address
         : userData.address
@@ -190,6 +195,22 @@ export default function UserProfilePanel({ userData = {}, onUpdateProfile }: Use
               />
             ) : (
               <p className="text-gray-900 dark:text-white">{userData.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Birthdate
+            </label>
+            {isEditing ? (
+              <input
+                type="tel"
+                value={editedData.birthdate}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#006A71] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            ) : (
+              <p className="text-gray-900 dark:text-white">{userData.birthdate}</p>
             )}
           </div>
 

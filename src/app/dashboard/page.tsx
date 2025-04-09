@@ -102,7 +102,7 @@ export default function UserDashboardPage() {
       setUserData({
         email: data.email,
         name: formData.name || formData.Name || formData.fullName || formData['Full Name'] || '',
-        about: formData.about || formData.About || formData.bio || formData.Bio || '',
+        about: formData['About Me'] || formData.about || formData.About || formData.bio || formData.Bio || '',
         address: formattedAddress,
         phone: formData.phone || formData.Phone || formData['Phone Number'] || '',
         profileImage: formData.profileImage || formData.avatar || '',
