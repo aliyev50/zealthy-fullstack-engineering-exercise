@@ -1,6 +1,10 @@
-# Admin App Onboarding System
+# Zealthy - Onboarding System App
 
-A comprehensive admin and user management application built with Next.js, TypeScript, and MongoDB, featuring a customizable onboarding flow.
+An onboarding and user management application built with Next.js, TypeScript, and MongoDB, featuring a customizable onboarding flow.
+
+## Live Demo
+
+The application is deployed and available at: [zealthy-phi.vercel.app](https://zealthy-phi.vercel.app)
 
 ## Features
 
@@ -22,8 +26,8 @@ A comprehensive admin and user management application built with Next.js, TypeSc
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd admin-app-onboarding
+git clone https://github.com/aliyev50/zealthy-fullstack-engineering-exercise.git
+cd zealthy-fullstack-engineering-exercise
 ```
 
 2. Install dependencies:
@@ -37,7 +41,7 @@ pnpm install
 
 3. Create a `.env.local` file in the root directory and add your environment variables:
 ```
-MONGODB_URI=mongodb://localhost:27017/zealthy
+MONGODB_URI=<mongo-uri-ask-me-for-local-dev>
 # Add other required environment variables
 ```
 
@@ -127,7 +131,7 @@ pnpm start
 
 ## Deployment
 
-This application is configured for easy deployment on Vercel.
+This application is deployed on Vercel at [zealthy-phi.vercel.app](https://zealthy-phi.vercel.app).
 
 ## License
 
